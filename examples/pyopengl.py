@@ -48,22 +48,27 @@ class TestRenderable(object):
         except RuntimeError as e:
             raise RuntimeError(e)
         sys.setrecursionlimit(recursionlimit)
-        
+
+        pos_index = {}
+
         for polygon in polygons:
             n = polygon.plane.normal
             indices = []
             for v in polygon.vertices:
-                pos = [v.pos.x, v.pos.y, v.pos.z]
-                if not pos in self.vertices:
+                pos = (v.pos.x, v.pos.y, v.pos.z)
+                try:
+                    index = pos_index[pos]
+                except KeyError:
+                    index = len(pos_index)
+                    pos_index[pos] = index
                     self.vertices.append(pos)
                     self.vnormals.append([])
-                index = self.vertices.index(pos)
                 indices.append(index)
                 self.vnormals[index].append(v.normal)
             self.faces.append(indices)
             self.normals.append([n.x, n.y, n.z])
             self.colors.append(polygon.shared)
-        
+
         # setup vertex-normals
         ns = []
         for vns in self.vnormals:
@@ -124,7 +129,7 @@ def display():
     glTranslatef(0.0, 0.0, -1.0);
     glRotatef(rot, 1.0, 0.0, 0.0);
     glRotatef(rot, 0.0, 0.0, 1.0);
-    rot += 0.1
+    rot += 0.02
     
     renderable.render()
     
